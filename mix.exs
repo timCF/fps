@@ -21,7 +21,8 @@ defmodule Fps.Mixfile do
 						:tinca,
 						:exutils,
 						:jazz,
-						:maybe
+						:maybe,
+						:exactor
 					],
      mod: {Fps, []}]
   end
@@ -42,7 +43,8 @@ defmodule Fps.Mixfile do
 			{:tinca, github: "timCF/tinca"},
 			{:exutils, github: "timCF/exutils"},
 			{:jazz, github: "meh/jazz"},
-			{:maybe, github: "timCF/maybe"}
+			{:maybe, github: "timCF/maybe"},
+			{:exactor, github: "sasa1977/exactor", tag: "0467f8100bc735405d597dbf94996195eb31e0b6", override: true}
 		]
 	end
 end

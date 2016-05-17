@@ -35,3 +35,5 @@ config :wwwest_lite,
 	memo_ttl: 10000, # timeout for memorize json encode and decode
 	callback_module: Fps, # here are handlers for requests
 	post_data_type: :json # | :xml | :any # it's data type of post q for decoding
+config :logger,
+	level: :info

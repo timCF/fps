@@ -13,7 +13,7 @@ defmodule Fps do
 
 		children = [
 		# Define workers and child supervisors to be supervised
-		# worker(Fps.Worker, [arg1, arg2, arg3]),
+			worker(Fps.Worker, [])
 		]
 
 		# See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
@@ -43,7 +43,14 @@ defmodule Fps do
 	defp dir2exec, do: Exutils.priv_dir(:fps)<>"/fproxy"
 
 	def list_proxies(country \\ nil), do: Tinca.smart_memo(&phantom_cmd/2, ["#{dir2exec}/run.sh", (case country do ; nil -> [] ; bin when is_binary(bin) -> [bin] ; end)], &is_list/1, @memottl + :random.uniform(@memottl))
-	def list_countries, do: Tinca.smart_memo(&phantom_cmd/2, ["phantomjs",["#{dir2exec}/spys_counties.js"]], &is_list/1, @memottl + :random.uniform(@memottl))
+	def list_countries, do: Tinca.smart_memo(&list_countries_proc/0, [], &is_list/1, @memottl + :random.uniform(@memottl))
+
+	defp list_countries_proc do
+		case list_proxies do
+			lst = [_|_] -> phantom_cmd("phantomjs", ["--web-security=no","--proxy=#{Enum.random(lst)}","#{dir2exec}/spys_counties.js"])
+			error = %{error: _} -> error
+		end
+	end
 
 	defp phantom_cmd(script, args) when is_binary(script) and is_list(args) do
 		case System.cmd(script, args, [stderr_to_stdout: true, cd: dir2exec]) do
