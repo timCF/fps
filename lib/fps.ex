@@ -50,7 +50,7 @@ defmodule Fps do
 			{text,0} when is_binary(text) ->
 				case String.strip(text) |> Jazz.decode do
 					{:ok, lst = [_|_]} -> lst
-					error -> %{error: "phantom decode #{inspect [script, args]} error #{inspect error}"}
+					error -> %{error: "phantom decode #{inspect [script, args]} error #{inspect error} on text #{inspect text}"}
 				end
 			error ->
 				%{error: "phantom get #{inspect [script, args]} error #{inspect error}"}
