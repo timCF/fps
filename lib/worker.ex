@@ -14,7 +14,7 @@ defmodule Fps.Worker do
 			%{error: error} ->
 				Logger.error(error)
 			lst = [_|_] ->
-				Enum.each(lst, fn(country) ->
+				Exutils.pmap_lim(lst, 1, 20, fn(country) ->
 					case Fps.list_proxies(country) do
 						%{error: error} -> Logger.error(error)
 						[_|_] -> :ok
