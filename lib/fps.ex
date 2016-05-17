@@ -1,7 +1,6 @@
 defmodule Fps do
 	use Application
 	use Silverb, [
-		{"@dir2exec", Exutils.priv_dir(:fps)<>"/fproxy"},
 		{"@memottl", :timer.minutes(10)}
 	]
 	require WwwestLite
@@ -41,11 +40,13 @@ defmodule Fps do
 		def handle_wwwest_lite(%{cmd: "proxylist"}), do: (list_proxies |> Jazz.encode!)
 	end
 
-	def list_proxies(country \\ nil), do: Tinca.smart_memo(&phantom_cmd/2, ["#{@dir2exec}/run.sh", (case country do ; nil -> [] ; bin when is_binary(bin) -> [bin] ; end)], &is_list/1, @memottl + :random.uniform(@memottl))
-	def list_countries, do: Tinca.smart_memo(&phantom_cmd/2, ["phantomjs",["#{@dir2exec}/spys_counties.js"]], &is_list/1, @memottl + :random.uniform(@memottl))
+	defp dir2exec, do: Exutils.priv_dir(:fps)<>"/fproxy"
+
+	def list_proxies(country \\ nil), do: Tinca.smart_memo(&phantom_cmd/2, ["#{dir2exec}/run.sh", (case country do ; nil -> [] ; bin when is_binary(bin) -> [bin] ; end)], &is_list/1, @memottl + :random.uniform(@memottl))
+	def list_countries, do: Tinca.smart_memo(&phantom_cmd/2, ["phantomjs",["#{dir2exec}/spys_counties.js"]], &is_list/1, @memottl + :random.uniform(@memottl))
 
 	defp phantom_cmd(script, args) when is_binary(script) and is_list(args) do
-		case System.cmd(script, args, [stderr_to_stdout: true, cd: @dir2exec]) do
+		case System.cmd(script, args, [stderr_to_stdout: true, cd: dir2exec]) do
 			{text,0} when is_binary(text) ->
 				case String.strip(text) |> Jazz.decode do
 					{:ok, lst = [_|_]} -> lst
