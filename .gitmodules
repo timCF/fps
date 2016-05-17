@@ -1,0 +1,3 @@
+[submodule "priv/fproxy"]
+	path = priv/fproxy
+	url = git@github.com:timCF/fproxy.git
