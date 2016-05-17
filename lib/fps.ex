@@ -47,7 +47,7 @@ defmodule Fps do
 	defp phantom_cmd(script, args) when is_binary(script) and is_list(args) do
 		case System.cmd(script, args, [stderr_to_stdout: true, cd: @dir2exec]) do
 			{text,0} when is_binary(text) ->
-				case Jazz.decode(text) do
+				case String.strip(text) |> Jazz.decode do
 					{:ok, lst = [_|_]} -> lst
 					error -> %{error: "phantom decode #{inspect [script, args]} error #{inspect error}"}
 				end
