@@ -61,7 +61,10 @@ defmodule Fps do
 	defp dir2exec, do: Exutils.priv_dir(:fps)<>"/fproxy"
 
 	def list_proxies(country \\ nil) do
-		Tinca.smart_memo(&phantom_cmd/2, ["#{dir2exec}/run.sh", (case country do ; nil -> [] ; bin when is_binary(bin) -> [bin] ; end)], &is_list/1, @memottl + :random.uniform(@memottl))
+		case Tinca.get({:list_proxies, nil}, :backups) do
+			nil -> Tinca.smart_memo(&phantom_cmd/2, ["#{dir2exec}/run.sh", (case country do ; nil -> [] ; bin when is_binary(bin) -> [bin] ; end)], &is_list/1, @memottl + :random.uniform(@memottl))
+			lst = [_|_] -> Tinca.smart_memo(&phantom_cmd/2, ["phantomjs", ["--web-security=no","--proxy=#{Enum.random(lst)}","#{dir2exec}/spys.js"|(case country do ; nil -> [] ; bin when is_binary(bin) -> [bin] ; end)]], &is_list/1, @memottl + :random.uniform(@memottl))
+		end
 		|> process_backup({:list_proxies, country})
 	end
 	def list_countries do
