@@ -1,7 +1,7 @@
 defmodule Fps do
 	use Application
 	use Silverb, [
-		{"@memottl", :timer.minutes(10)}
+		{"@memottl", :timer.minutes(30)}
 	]
 	require WwwestLite
 	require Exutils
@@ -27,20 +27,20 @@ defmodule Fps do
 	WwwestLite.callback_module do
 		def handle_wwwest_lite(%{cmd: "countrylist"}) do
 			case Tinca.get(:list_countries, :backups) do
-				nil -> %{error: "404 , not avaliable yet"}
+				nil -> %{error: "404 , countrylist is not available yet"}
 				data = [_|_] -> data
 			end
 			|> Jazz.encode!
 		end
 		def handle_wwwest_lite(%{cmd: "proxylist", country: country}) do
 			case Tinca.get(:list_countries, :backups) do
-				nil -> %{error: "404 , not avaliable yet"}
+				nil -> %{error: "404 , countrylist is not available yet , can not get proxylist"}
 				countries = [_|_] ->
 					country = Maybe.maybe_to_string(country) |> String.strip |> String.upcase |> Exutils.try_catch
 					case Enum.member?(countries, country) do
 						true ->
 							case Tinca.get({:list_proxies, country}, :backups) do
-								nil -> %{error: "404 , proxylist for country #{country} not avaliable yet"}
+								nil -> %{error: "404 , proxylist for country #{country} is not available yet"}
 								data = [_|_] -> data
 							end
 						false ->
@@ -51,7 +51,7 @@ defmodule Fps do
 		end
 		def handle_wwwest_lite(%{cmd: "proxylist"}) do
 			case Tinca.get({:list_proxies, nil}, :backups) do
-				nil -> %{error: "404 , proxylist not avaliable yet"}
+				nil -> %{error: "404 , proxylist is not available yet"}
 				data = [_|_] -> data
 			end
 			|> Jazz.encode!
@@ -61,9 +61,14 @@ defmodule Fps do
 	defp dir2exec, do: Exutils.priv_dir(:fps)<>"/fproxy"
 
 	def list_proxies(country \\ nil) do
+		countryarg = (case country do ; nil -> [] ; bin when is_binary(bin) -> [bin] ; end)
 		case Tinca.get({:list_proxies, nil}, :backups) do
-			nil -> Tinca.smart_memo(&phantom_cmd/2, ["#{dir2exec}/run.sh", (case country do ; nil -> [] ; bin when is_binary(bin) -> [bin] ; end)], &is_list/1, @memottl + :random.uniform(@memottl))
-			lst = [_|_] -> Tinca.smart_memo(&phantom_cmd/2, ["phantomjs", ["--web-security=no","--proxy=#{Enum.random(lst)}","#{dir2exec}/spys.js"|(case country do ; nil -> [] ; bin when is_binary(bin) -> [bin] ; end)]], &is_list/1, @memottl + :random.uniform(@memottl))
+			nil -> Tinca.smart_memo(&phantom_cmd/2, ["#{dir2exec}/run.sh", countryarg], &is_list/1, @memottl + :random.uniform(@memottl))
+			proxylst = [_|_] ->
+				case Tinca.smart_memo(&list_proxies_proc/2, [proxylst, countryarg], &is_list/1, @memottl + :random.uniform(@memottl)) do
+					lst = [_|_] -> lst
+					%{error: _} -> Tinca.smart_memo(&phantom_cmd/2, ["#{dir2exec}/run.sh", countryarg], &is_list/1, @memottl + :random.uniform(@memottl))
+				end
 		end
 		|> process_backup({:list_proxies, country})
 	end
@@ -78,6 +83,7 @@ defmodule Fps do
 			error = %{error: _} -> error
 		end
 	end
+	defp list_proxies_proc(proxylst = [_|_], countryarg), do: phantom_cmd("phantomjs", ["--web-security=no","--proxy=#{Enum.random(proxylst)}","#{dir2exec}/spys.js"|countryarg])
 
 	defp phantom_cmd(script, args) when is_binary(script) and is_list(args) do
 		case System.cmd(script, args, [stderr_to_stdout: true, cd: dir2exec]) do
