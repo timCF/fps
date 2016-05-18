@@ -25,20 +25,37 @@ defmodule Fps do
 
 
 	WwwestLite.callback_module do
-		def handle_wwwest_lite(%{cmd: "countrylist"}), do: (list_countries |> Jazz.encode!)
+		def handle_wwwest_lite(%{cmd: "countrylist"}) do
+			case Tinca.get(:list_countries, :backups) do
+				nil -> %{error: "404 , not avaliable yet"}
+				data = [_|_] -> data
+			end
+			|> Jazz.encode!
+		end
 		def handle_wwwest_lite(%{cmd: "proxylist", country: country}) do
-			case list_countries do
-				error = %{error: _} -> error
+			case Tinca.get(:list_countries, :backups) do
+				nil -> %{error: "404 , not avaliable yet"}
 				countries = [_|_] ->
 					country = Maybe.maybe_to_string(country) |> String.strip |> String.upcase |> Exutils.try_catch
 					case Enum.member?(countries, country) do
-						true -> list_proxies(country)
-						false -> %{error: "country #{inspect country} is not supported"}
+						true ->
+							case Tinca.get({:list_proxies, country}, :backups) do
+								nil -> %{error: "404 , proxylist for country #{country} not avaliable yet"}
+								data = [_|_] -> data
+							end
+						false ->
+							%{error: "country #{inspect country} is not supported"}
 					end
 			end
 			|> Jazz.encode!
 		end
-		def handle_wwwest_lite(%{cmd: "proxylist"}), do: (list_proxies |> Jazz.encode!)
+		def handle_wwwest_lite(%{cmd: "proxylist"}) do
+			case Tinca.get({:list_proxies, nil}, :backups) do
+				nil -> %{error: "404 , proxylist not avaliable yet"}
+				data = [_|_] -> data
+			end
+			|> Jazz.encode!
+		end
 	end
 
 	defp dir2exec, do: Exutils.priv_dir(:fps)<>"/fproxy"
