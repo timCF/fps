@@ -5,12 +5,13 @@ defmodule Fps do
 	]
 	require WwwestLite
 	require Exutils
+	use Tinca, [:backups]
 
 	# See http://elixir-lang.org/docs/stable/elixir/Application.html
 	# for more information on OTP Applications
 	def start(_type, _args) do
 		import Supervisor.Spec, warn: false
-
+		Tinca.declare_namespaces
 		children = [
 		# Define workers and child supervisors to be supervised
 			worker(Fps.Worker, [])
@@ -42,8 +43,14 @@ defmodule Fps do
 
 	defp dir2exec, do: Exutils.priv_dir(:fps)<>"/fproxy"
 
-	def list_proxies(country \\ nil), do: Tinca.smart_memo(&phantom_cmd/2, ["#{dir2exec}/run.sh", (case country do ; nil -> [] ; bin when is_binary(bin) -> [bin] ; end)], &is_list/1, @memottl + :random.uniform(@memottl))
-	def list_countries, do: Tinca.smart_memo(&list_countries_proc/0, [], &is_list/1, @memottl + :random.uniform(@memottl))
+	def list_proxies(country \\ nil) do
+		Tinca.smart_memo(&phantom_cmd/2, ["#{dir2exec}/run.sh", (case country do ; nil -> [] ; bin when is_binary(bin) -> [bin] ; end)], &is_list/1, @memottl + :random.uniform(@memottl))
+		|> process_backup({:list_proxies, country})
+	end
+	def list_countries do
+		Tinca.smart_memo(&list_countries_proc/0, [], &is_list/1, @memottl + :random.uniform(@memottl))
+		|> process_backup(:list_countries)
+	end
 
 	defp list_countries_proc do
 		case list_proxies do
@@ -61,6 +68,14 @@ defmodule Fps do
 				end
 			error ->
 				%{error: "phantom get #{inspect [script, args]} error #{inspect error}"}
+		end
+	end
+
+	defp process_backup(data = [_|_], etskey), do: Tinca.put(data, etskey, :backups)
+	defp process_backup(error = %{error: _}, etskey) do
+		case Tinca.get(etskey, :backups) do
+			nil -> error
+			data = [_|_] -> data
 		end
 	end
 
