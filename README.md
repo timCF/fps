@@ -1,20 +1,15 @@
 # Fps
 
-**TODO: Add description**
+API gives secure ( ssl support ) proxy servers for some countries
 
-## Installation
+available commands
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed as:
-
-  1. Add fps to your list of dependencies in `mix.exs`:
-
-        def deps do
-          [{:fps, "~> 0.0.1"}]
-        end
-
-  2. Ensure fps is started before your application:
-
-        def application do
-          [applications: [:fps]]
-        end
-
+- countrylist : gives supported countries list
+   - http://92.222.106.195:9944/?cmd=countrylist
+- proxylist : gives proxy list for counties
+   - http://92.222.106.195:9944/?cmd=proxylist
+   - http://92.222.106.195:9944/?cmd=proxylist&country=ru
+   - http://92.222.106.195:9944/?cmd=proxylist&country=us
+   - http://92.222.106.195:9944/?cmd=proxylist&country=kz
+   - http://92.222.106.195:9944/?cmd=proxylist&country=cy
+   - etc ...
