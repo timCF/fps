@@ -63,17 +63,17 @@ defmodule Fps do
 	def list_proxies(country \\ nil) do
 		countryarg = (case country do ; nil -> [] ; bin when is_binary(bin) -> [bin] ; end)
 		case Tinca.get({:list_proxies, nil}, :backups) do
-			nil -> Tinca.smart_memo(&phantom_cmd/2, ["#{dir2exec}/run.sh", countryarg], &is_list/1, @memottl + :random.uniform(@memottl))
+			nil -> Tinca.smart_memo(&phantom_cmd/2, ["#{dir2exec}/run.sh", countryarg], &is_list/1, @memottl + :rand.uniform(@memottl))
 			proxylst = [_|_] ->
-				case Tinca.smart_memo(&list_proxies_proc/2, [proxylst, countryarg], &is_list/1, @memottl + :random.uniform(@memottl)) do
+				case Tinca.smart_memo(&list_proxies_proc/2, [proxylst, countryarg], &is_list/1, @memottl + :rand.uniform(@memottl)) do
 					lst = [_|_] -> lst
-					%{error: _} -> Tinca.smart_memo(&phantom_cmd/2, ["#{dir2exec}/run.sh", countryarg], &is_list/1, @memottl + :random.uniform(@memottl))
+					%{error: _} -> Tinca.smart_memo(&phantom_cmd/2, ["#{dir2exec}/run.sh", countryarg], &is_list/1, @memottl + :rand.uniform(@memottl))
 				end
 		end
 		|> process_backup({:list_proxies, country})
 	end
 	def list_countries do
-		Tinca.smart_memo(&list_countries_proc/0, [], &is_list/1, @memottl + :random.uniform(@memottl))
+		Tinca.smart_memo(&list_countries_proc/0, [], &is_list/1, @memottl + :rand.uniform(@memottl))
 		|> process_backup(:list_countries)
 	end
 
