@@ -6,7 +6,7 @@ defmodule Fps.Worker do
 		{:ok, nil, @ttl}
 	end
 	definfo :timeout do
-		case Fps.list_proxies do
+		_ = case Fps.list_proxies do
 			%{error: error} -> Logger.error(error)
 			[_|_] -> :ok
 		end
@@ -16,7 +16,8 @@ defmodule Fps.Worker do
 			lst = [_|_] ->
 				Enum.shuffle(lst)
 				|> Exutils.pmap_lim(1, 20, fn(country) ->
-					case Fps.list_proxies(country) do
+					_ = Fps.Halter.reset()
+					_ = case Fps.list_proxies(country) do
 						%{error: error} -> Logger.error(error)
 						[_|_] -> :ok
 					end

@@ -4,7 +4,7 @@ defmodule Fps.Mixfile do
   def project do
     [app: :fps,
      version: "0.0.1",
-     elixir: "~> 1.2",
+     #elixir: "~> 1.2",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      deps: deps]
@@ -39,7 +39,7 @@ defmodule Fps.Mixfile do
 	defp deps do
 		[
 			{:silverb, github: "timCF/silverb"},
-			{:wwwest_lite, github: "timCF/wwwest_lite"},
+			{:wwwest_lite, github: "timCF/wwwest_lite", tag: "e56d8441ec4c3d0905c8a919d4570523ef94ba47"},
 			{:tinca, github: "timCF/tinca"},
 			{:exutils, github: "timCF/exutils"},
 			{:jazz, github: "meh/jazz"},

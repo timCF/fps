@@ -14,7 +14,8 @@ defmodule Fps do
 		Tinca.declare_namespaces
 		children = [
 		# Define workers and child supervisors to be supervised
-			worker(Fps.Worker, [])
+			worker(Fps.Worker, []),
+			worker(Fps.Halter, []),
 		]
 
 		# See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
