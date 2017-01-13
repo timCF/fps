@@ -87,7 +87,7 @@ defmodule Fps do
 	defp list_proxies_proc(proxylst = [_|_], countryarg), do: phantom_cmd("phantomjs", ["--web-security=no","--proxy=#{Enum.random(proxylst)}","#{dir2exec}/spys.js"|countryarg])
 
 	defp phantom_cmd(script, args) when is_binary(script) and is_list(args) do
-		case System.cmd(script, args, [stderr_to_stdout: true, cd: dir2exec]) do
+		case System.cmd("timeout", (["-k", "600s", "600s", script] ++ args), [stderr_to_stdout: true, cd: dir2exec]) do
 			{text,0} when is_binary(text) ->
 				case String.strip(text) |> Jazz.decode do
 					{:ok, lst = [_|_]} -> lst
