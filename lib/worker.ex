@@ -16,7 +16,6 @@ defmodule Fps.Worker do
 			lst = [_|_] ->
 				Enum.shuffle(lst)
 				|> Exutils.pmap_lim(1, 20, fn(country) ->
-					_ = Fps.Halter.reset()
 					_ = case Fps.list_proxies(country) do
 						%{error: error} -> Logger.error(error)
 						[_|_] -> :ok
