@@ -88,7 +88,7 @@ defmodule Fps do
 
 	defp phantom_cmd(script, args) when is_binary(script) and is_list(args) do
 		_ = Fps.Halter.reset()
-		case System.cmd("timeout", (["-k", "600s", "600s", script] ++ args), [stderr_to_stdout: true, cd: dir2exec]) do
+		case System.cmd("timeout", (["-s", "KILL", "600s", script] ++ args), [stderr_to_stdout: true, cd: dir2exec]) do
 			{text,0} when is_binary(text) ->
 				case String.strip(text) |> Jazz.decode do
 					{:ok, lst = [_|_]} -> lst
